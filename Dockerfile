@@ -49,6 +49,7 @@ COPY --link --chmod=755 docker/php/docker-healthcheck.sh /usr/local/bin/docker-h
 HEALTHCHECK --start-period=1m CMD docker-healthcheck
 
 COPY --link --chmod=755 docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php-fpm"]
 
@@ -110,7 +111,7 @@ WORKDIR /srv/app
 ADD --chmod=500 https://caddyserver.com/api/download?os=linux&arch=$TARGETARCH&p=github.com/dunglas/mercure/caddy&p=github.com/dunglas/vulcain/caddy /usr/bin/caddy
 
 COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile
-HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider https://localhost/healthz || exit 1
 
 # Prod Caddy image
 FROM caddy_base AS caddy_prod
