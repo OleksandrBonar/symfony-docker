@@ -27,7 +27,7 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		fi
 	fi
 
-	if [ ! -d 'vendor/' ]; then
+	if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
 		composer install --prefer-dist --no-progress --no-interaction
 	fi
 
