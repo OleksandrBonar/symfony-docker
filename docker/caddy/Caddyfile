@@ -42,6 +42,8 @@
 
 	vulcain
 
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
 	php_fastcgi unix//var/run/php/php-fpm.sock
 	file_server
 }
