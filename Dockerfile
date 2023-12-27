@@ -21,6 +21,7 @@ WORKDIR /srv/app
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
 		acl \
+		fcgi \
 		file \
 		gettext \
 		git \
