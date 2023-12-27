@@ -4,7 +4,7 @@
 	# https://caddyserver.com/docs/caddyfile/directives#sorting-algorithm
 	order mercure after encode
 	order vulcain after reverse_proxy
-	order php_server before file_server
+	order php_fastcgi before file_server
 }
 
 {$CADDY_EXTRA_CONFIG}
