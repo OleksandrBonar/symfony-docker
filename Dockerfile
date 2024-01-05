@@ -4,7 +4,7 @@
 FROM php:8.2-fpm-alpine AS php_upstream
 FROM mlocati/php-extension-installer:2 AS php_extension_installer_upstream
 FROM composer/composer:2-bin AS composer_upstream
-FROM caddy:2-alpine AS caddy_upstream
+FROM nginx:alpine AS nginx_upstream
 
 
 # The different stages of this Dockerfile are meant to be built into separate images
@@ -44,7 +44,6 @@ RUN set -eux; \
 COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
 
 COPY --link docker/php/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN mkdir -p /var/run/php
 
 COPY --link --chmod=755 docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 HEALTHCHECK --start-period=1m CMD docker-healthcheck
@@ -101,20 +100,15 @@ RUN set -eux; \
 	chmod +x bin/console; sync;
 
 
-# Base Caddy image
-FROM caddy_upstream AS caddy_base
-
-ARG TARGETARCH
+# Base NGINX image
+FROM nginx_upstream AS nginx_base
 
 WORKDIR /srv/app
 
-# Download Caddy compiled with the Mercure and Vulcain modules
-ADD --chmod=500 https://caddyserver.com/api/download?os=linux&arch=$TARGETARCH&p=github.com/dunglas/mercure/caddy&p=github.com/dunglas/vulcain/caddy /usr/bin/caddy
+COPY --link docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+HEALTHCHECK --start-period=60s CMD curl -f http://localhost || exit 1
 
-COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:2019/metrics || exit 1
-
-# Prod Caddy image
-FROM caddy_base AS caddy_prod
+# Prod NGINX image
+FROM nginx_base AS nginx_prod
 
 COPY --from=php_prod --link /srv/app/public public/
